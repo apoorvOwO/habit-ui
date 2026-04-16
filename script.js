@@ -3,7 +3,8 @@ const habitList = document.getElementById('habit-list');
 const addBtn = document.getElementById('add-habit');
 const clearBtn = document.getElementById('clear-data');
 const exportBtn = document.getElementById('export-data'); 
-const themeToggleBtn = document.getElementById('theme-toggle'); 
+const themeToggleBtn = document.getElementById('theme-toggle');
+const randomizeThemeBtn = document.getElementById('randomize-theme-btn');
 
 const modal = document.getElementById('add-modal');
 const confirmAddBtn = document.getElementById('confirm-add');
@@ -20,21 +21,48 @@ const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep
  * Applies the theme (light/dark) based on the value stored in localStorage.
  */
 function applyTheme() {
-    const savedTheme = localStorage.getItem('habitAppTheme');
+    const savedTheme = localStorage.getItem('habitAppTheme') || 'dark';
+    document.body.classList.remove('light-theme', 'clause-theme');
+
     if (savedTheme === 'light') {
         document.body.classList.add('light-theme');
-        themeToggleBtn.textContent = '🌙'; 
-    } else {
-        document.body.classList.remove('light-theme');
-        themeToggleBtn.textContent = '☀️'; 
+        themeToggleBtn.textContent = '🤖';
+    } else if (savedTheme === 'clause') {
+        document.body.classList.add('clause-theme');
+        themeToggleBtn.textContent = '☀️';
+    } else { // dark
+        themeToggleBtn.textContent = '🌙';
     }
 }
+
+/**
+ * Applies the custom accent color from localStorage.
+ */
+function applyAccentColor() {
+    const savedAccent = localStorage.getItem('habitAppAccentColor');
+    if (savedAccent) {
+        document.documentElement.style.setProperty('--accent-color', savedAccent);
+    }
+}
+
 applyTheme();
+applyAccentColor();
 
 // Event listener for the theme toggle button.
 themeToggleBtn.addEventListener('click', () => {
-    localStorage.setItem('habitAppTheme', document.body.classList.contains('light-theme') ? 'dark' : 'light');
+    const currentTheme = localStorage.getItem('habitAppTheme') || 'dark';
+    const nextTheme = currentTheme === 'dark' ? 'light' : currentTheme === 'light' ? 'clause' : 'dark';
+    localStorage.setItem('habitAppTheme', nextTheme);
     applyTheme();
+});
+
+// Event listener for the randomize accent color button.
+randomizeThemeBtn.addEventListener('click', () => {
+    const hue = Math.floor(Math.random() * 360);
+    const newAccentColor = `hsl(${hue}, ${70 + Math.floor(Math.random() * 20)}%, ${55 + Math.floor(Math.random() * 10)}%)`;
+    
+    document.documentElement.style.setProperty('--accent-color', newAccentColor);
+    localStorage.setItem('habitAppAccentColor', newAccentColor);
 });
 
 // Utility Functions

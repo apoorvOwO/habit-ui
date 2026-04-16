@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notes App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="nav-bar">
+        <a href="index.html" class="nav-link">📅 Habit Tracker</a>
+        <a href="kanban.html" class="nav-link">📋 Project Planner</a>
+        <a href="notes.html" class="nav-link active">📝 Notes</a>
+        <button id="randomize-theme-btn" class="icon-btn" title="Randomize Accent" style="font-size: 1.3rem;">🎲</button>
+        <button id="theme-toggle" class="icon-btn">☀️</button>
+    </nav>
+
+    <div class="app-wrapper">
+        <header class="app-header">
+            <div>
+                <h1>📝 Notes & Keep</h1>
+                <p>A simple place for your thoughts and links.</p>
+            </div>
+            <button id="clear-notes" class="secondary-btn">🗑 Clear All</button>
+        </header>
+
+        <div class="note-input-area">
+            <input type="text" id="note-title" placeholder="Title">
+            <textarea id="note-body" placeholder="Take a note..."></textarea>
+            <input type="url" id="note-url" placeholder="Add Link (for preview)">
+            <button id="add-note-btn" class="primary-btn">Save Note</button>
+        </div>
+
+        <div class="notes-grid" id="notes-grid"></div>
+    </div>
+    <script src="notes.js"></script>
+</body>
+</html>

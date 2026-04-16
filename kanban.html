@@ -90,6 +90,7 @@
         .task-card.dragging { opacity: 0.45; cursor: grabbing; transform: scale(0.97); }
 
         .task-card-header { display: flex; align-items: flex-start; gap: 10px; }
+
         .task-priority {
             width: 8px; height: 8px; border-radius: 50%;
             margin-top: 5px; flex-shrink: 0;
@@ -194,6 +195,7 @@
         <a href="index.html" class="nav-link">📅 Habit Tracker</a>
         <a href="kanban.html" class="nav-link active">📋 Project Planner</a>
         <a href="about.html" class="nav-link">ℹ️ About</a>
+        <button id="randomize-theme-btn" class="icon-btn" title="Randomize Accent" style="font-size: 1.3rem;">🎲</button>
         <button id="theme-toggle" class="icon-btn" title="Toggle Theme" style="font-size:1.3rem;">☀️</button>
     </nav>
 
@@ -313,15 +315,39 @@
 
     <script>
     const themeToggle = document.getElementById('theme-toggle');
+    const randomizeBtn = document.getElementById('randomize-theme-btn');
+
     function applyTheme() {
-        const t = localStorage.getItem('habitAppTheme');
-        if (t === 'light') { document.body.classList.add('light-theme'); themeToggle.textContent = '🌙'; }
-        else               { document.body.classList.remove('light-theme'); themeToggle.textContent = '☀️'; }
+        const savedTheme = localStorage.getItem('habitAppTheme') || 'dark';
+        document.body.classList.remove('light-theme', 'clause-theme');
+
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-theme');
+            themeToggle.textContent = '🤖';
+        } else if (savedTheme === 'clause') {
+            document.body.classList.add('clause-theme');
+            themeToggle.textContent = '☀️';
+        } else { // dark
+            themeToggle.textContent = '🌙';
+        }
+    }
+    function applyAccentColor() {
+        const savedAccent = localStorage.getItem('habitAppAccentColor');
+        if (savedAccent) document.documentElement.style.setProperty('--accent-color', savedAccent);
     }
     applyTheme();
+    applyAccentColor();
+
     themeToggle.addEventListener('click', () => {
-        localStorage.setItem('habitAppTheme', document.body.classList.contains('light-theme') ? 'dark' : 'light');
+        const current = localStorage.getItem('habitAppTheme') || 'dark';
+        const next = current === 'dark' ? 'light' : current === 'light' ? 'clause' : 'dark';
+        localStorage.setItem('habitAppTheme', next);
         applyTheme();
+    });
+    randomizeBtn.addEventListener('click', () => {
+        const newAccent = `hsl(${Math.floor(Math.random() * 360)}, ${70 + Math.floor(Math.random() * 20)}%, ${55 + Math.floor(Math.random() * 10)}%)`;
+        document.documentElement.style.setProperty('--accent-color', newAccent);
+        localStorage.setItem('habitAppAccentColor', newAccent);
     });
 
     const STORE_KEY = 'kanbanData_v2';
@@ -339,14 +365,14 @@
                     name: 'My First Project',
                     tasks: {
                         todo: [
-                            { id: uid(), title: 'Plan project scope', priority: 'high',   due: '', tag: 'Planning' },
-                            { id: uid(), title: 'Set up repository',  priority: 'medium', due: '', tag: 'Dev' }
+                        { id: uid(), title: 'Plan project scope', priority: 'high',   due: '', tag: 'Planning' },
+                        { id: uid(), title: 'Set up repository',  priority: 'medium', due: '', tag: 'Dev' }
                         ],
                         inprogress: [
-                            { id: uid(), title: 'Design wireframes',  priority: 'medium', due: '', tag: 'Design' }
+                        { id: uid(), title: 'Design wireframes',  priority: 'medium', due: '', tag: 'Design' }
                         ],
                         done: [
-                            { id: uid(), title: 'Kick-off meeting',   priority: 'low',    due: '', tag: '' }
+                        { id: uid(), title: 'Kick-off meeting',   priority: 'low',    due: '', tag: '' }
                         ]
                     }
                 }
@@ -448,6 +474,7 @@
             const idx    = proj.tasks[fromCol].findIndex(t => t.id === taskId);
             if (idx === -1) return;
             const [task] = proj.tasks[fromCol].splice(idx, 1);
+
             proj.tasks[toCol].push(task);
             saveData(appData);
             renderBoard();

@@ -23,6 +23,28 @@ body.light-theme {
     --empty-square: rgba(0, 0, 0, 0.08);   
 }
 
+/* Clause AI Theme */
+body.clause-theme {
+    --bg-gradient: linear-gradient(-45deg, #0d0d0d, #1a1a1a, #111111, #000000);
+    --card-bg: rgba(34, 34, 34, 0.75);
+    --card-border: rgba(255, 255, 255, 0.15);
+    --text-primary: #f0f0f0;
+    --text-secondary: #888888;
+    --accent-color: #ff6c00;
+    --empty-square: rgba(255, 255, 255, 0.08);
+}
+body.clause-theme .secondary-btn {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+}
+body.clause-theme .modal-content input,
+body.clause-theme .add-input-group input,
+body.clause-theme .note-input-area input, 
+body.clause-theme .note-input-area textarea {
+    background: rgba(0,0,0,0.3);
+}
+body.clause-theme .item-list li { background: rgba(0,0,0,0.3); }
+
 /* =========================================
    Base & Global Styles
    ========================================= */
@@ -270,3 +292,46 @@ body.light-theme .add-input-group input { background: rgba(255, 255, 255, 0.5); 
     background: var(--habit-color); color: #000; border: none;
     width: 35px; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: pointer;
 }
+/* Notes Specific */
+.note-input-area {
+    background: var(--card-bg); backdrop-filter: blur(12px);
+    border: 1px solid var(--card-border); border-radius: 16px;
+    padding: 20px; display: flex; flex-direction: column; gap: 10px;
+    margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+.note-input-area input, .note-input-area textarea {
+    background: rgba(0,0,0,0.2); color: var(--text-primary);
+    border: 1px solid var(--card-border); padding: 12px;
+    border-radius: 10px; font-family: inherit;
+}
+body.light-theme .note-input-area input, body.light-theme .note-input-area textarea { background: rgba(255,255,255,0.5); }
+.notes-grid { column-count: 3; column-gap: 20px; }
+@media(max-width: 800px) { .notes-grid { column-count: 2; } }
+@media(max-width: 500px) { .notes-grid { column-count: 1; } }
+
+.note-card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 14px; padding: 15px; margin-bottom: 20px;
+    break-inside: avoid; transition: transform 0.2s; position: relative;
+}
+.note-card:hover { transform: translateY(-3px); }
+
+/* Styles for the embedded YouTube video preview */
+.note-video-preview {
+    margin-top: 10px;
+    border-radius: 8px;
+    overflow: hidden; /* Clips the iframe corners */
+    aspect-ratio: 16 / 9; /* Maintain video aspect ratio */
+}
+.note-video-preview iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+.note-link-preview {
+    display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.2);
+    padding: 10px; border-radius: 8px; margin-top: 10px; text-decoration: none;
+    color: var(--text-primary); font-size: 0.85rem;
+}
+.note-link-preview img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
+.note-delete { position: absolute; top: 10px; right: 10px; background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem; }
