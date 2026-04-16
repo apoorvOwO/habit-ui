@@ -4,25 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Habit Tracker</title>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <nav class="nav-bar">
+        <a href="index.html"  class="nav-link active">📅 Habit Tracker</a>
+        <a href="kanban.html" class="nav-link">📋 Project Planner</a>
+        <a href="about.html"  class="nav-link">ℹ️ About</a>
+        <button id="theme-toggle" class="icon-btn" title="Toggle Theme" style="font-size: 1.3rem;">☀️</button>
+    </nav>
+
     <div class="app-wrapper">
-        
         <header class="app-header">
             <div>
                 <h1>Habit Tracking Interface</h1>
                 <p>By Apurv Sahay and Anshuman Modgil</p>
             </div>
-            <button id="clear-data" class="secondary-btn">Clear All</button>
-            <button id="add-habit" class="primary-btn">+ New</button>
+            <div class="header-controls">
+                <button id="export-data" class="secondary-btn">Export CSV</button>
+                <button id="clear-data" class="secondary-btn">Clear All</button>
+                <button id="add-habit" class="primary-btn">+ New</button>
+            </div>
         </header>
 
         <main id="habit-list">
             </main>
+    </div>
 
+    <div id="add-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Create a New Habit</h3>
+            <label for="habit-name-input">Habit Name:</label>
+            <input type="text" id="habit-name-input" placeholder="e.g., Morning Run">
+            <label for="habit-deadline-input">Target Deadline (Optional):</label>
+            <input type="date" id="habit-deadline-input">
+            <div class="modal-actions">
+                <button id="cancel-add" class="secondary-btn">Cancel</button>
+                <button id="confirm-add" class="primary-btn">Create</button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>

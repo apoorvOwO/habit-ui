@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Planner – Kanban</title>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* ── Kanban Specific Variables ── */
+        :root {
+            --col-todo:       rgba(59,  130, 246, 0.18);
+            --col-inprogress: rgba(234, 179,   8, 0.18);
+            --col-done:       rgba( 74, 222, 128, 0.18);
+            --col-todo-accent:       #3b82f6;
+            --col-inprogress-accent: #eab308;
+            --col-done-accent:       #4ade80;
+        }
+        body.light-theme {
+            --col-todo:       rgba(59,  130, 246, 0.12);
+            --col-inprogress: rgba(234, 179,   8, 0.12);
+            --col-done:       rgba( 74, 222, 128, 0.12);
+        }
+
+        /* ── App wrapper (Wider for Kanban) ── */
+        .app-wrapper { max-width: 1200px; margin: 40px auto 0; }
+
+        .app-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 40px; flex-wrap: wrap; gap: 15px;
+        }
+        .app-header h1 { margin: 0; font-size: 2rem; font-weight: 800; }
+        .app-header p  { margin: 5px 0 0; color: var(--text-secondary); font-size: 1rem; }
+        .header-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        /* ── Board ── */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 760px) { .board { grid-template-columns: 1fr; } }
+
+        .column {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            min-height: 300px;
+            transition: background 0.3s;
+        }
+        .column-header {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 20px;
+        }
+        .col-dot {
+            width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+        }
+        .column[data-col="todo"]        .col-dot { background: var(--col-todo-accent); }
+        .column[data-col="inprogress"]  .col-dot { background: var(--col-inprogress-accent); }
+        .column[data-col="done"]        .col-dot { background: var(--col-done-accent); }
+
+        .column-title { font-weight: 700; font-size: 1.1rem; flex: 1; }
+        .col-count {
+            background: var(--empty-square); color: var(--text-secondary);
+            font-size: 0.8rem; font-weight: 700;
+            padding: 2px 9px; border-radius: 20px;
+        }
+
+        /* ── Cards ── */
+        .task-list { min-height: 60px; }
+
+        .task-card {
+            background: rgba(0,0,0,0.25);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            cursor: grab;
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+            position: relative;
+        }
+        body.light-theme .task-card { background: rgba(255,255,255,0.55); }
+        .task-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .task-card.dragging { opacity: 0.45; cursor: grabbing; transform: scale(0.97); }
+
+        .task-card-header { display: flex; align-items: flex-start; gap: 10px; }
+        .task-priority {
+            width: 8px; height: 8px; border-radius: 50%;
+            margin-top: 5px; flex-shrink: 0;
+        }
+        .p-high   { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+        .p-medium { background: #eab308; box-shadow: 0 0 6px #eab308; }
+        .p-low    { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+
+        .task-title { font-weight: 600; font-size: 0.95rem; flex: 1; word-break: break-word; }
+        .task-delete-btn {
+            background: transparent; border: none;
+            color: var(--text-secondary); font-size: 1.1rem;
+            cursor: pointer; padding: 0; line-height: 1;
+            opacity: 0; transition: opacity 0.2s, color 0.2s;
+        }
+        .task-card:hover .task-delete-btn { opacity: 1; }
+        .task-delete-btn:hover { color: #ef4444; }
+
+        .task-meta { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 7px; }
+        .task-tag {
+            background: var(--empty-square); color: var(--text-secondary);
+            font-size: 0.72rem; font-weight: 600;
+            padding: 3px 9px; border-radius: 20px;
+        }
+        .task-due {
+            font-size: 0.72rem; color: var(--text-secondary);
+            margin-top: 8px; display: flex; align-items: center; gap: 5px;
+        }
+        .task-due.overdue { color: #ef4444; }
+
+        /* Drop target glow */
+        .column.drag-over {
+            box-shadow: 0 0 0 2px var(--accent-color), 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        /* ── Add-task area ── */
+        .add-task-form { margin-top: 12px; }
+        .add-task-btn {
+            width: 100%; background: transparent;
+            border: 1px dashed var(--card-border);
+            color: var(--text-secondary); padding: 10px;
+            border-radius: 10px; cursor: pointer; font-size: 0.9rem;
+            transition: background 0.2s, color 0.2s;
+        }
+        .add-task-btn:hover { background: var(--empty-square); color: var(--text-primary); }
+
+        .task-form-inputs { display: none; flex-direction: column; gap: 8px; margin-top: 8px; }
+        .task-form-inputs.open { display: flex; }
+
+        .task-form-inputs input,
+        .task-form-inputs select {
+            background: rgba(0,0,0,0.2); border: 1px solid var(--card-border);
+            color: var(--text-primary); padding: 9px 12px;
+            border-radius: 9px; font-size: 0.9rem; font-family: inherit;
+        }
+        body.light-theme .task-form-inputs input,
+        body.light-theme .task-form-inputs select { background: rgba(255,255,255,0.55); }
+        .task-form-inputs input:focus,
+        .task-form-inputs select:focus { outline: 1px solid var(--accent-color); border-color: transparent; }
+        .task-form-inputs select option { background: #1a1f35; color: #fff; }
+
+        .form-row { display: flex; gap: 8px; }
+        .form-row input, .form-row select { flex: 1; }
+
+        .form-actions { display: flex; gap: 8px; }
+        .form-confirm-btn {
+            background: var(--accent-color); color: #000; border: none;
+            padding: 8px 16px; border-radius: 9px; font-weight: 700;
+            cursor: pointer; flex: 1;
+        }
+        .form-cancel-btn {
+            background: var(--empty-square); border: 1px solid var(--card-border);
+            color: var(--text-primary); padding: 8px 14px;
+            border-radius: 9px; cursor: pointer;
+        }
+
+        /* ── Project switcher ── */
+        .project-bar {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 28px; flex-wrap: wrap;
+        }
+        .project-tab {
+            background: var(--empty-square); border: 1px solid var(--card-border);
+            color: var(--text-secondary); padding: 7px 16px; border-radius: 10px;
+            cursor: pointer; font-size: 0.9rem; font-weight: 600;
+            transition: background 0.2s, color 0.2s; white-space: nowrap;
+        }
+        .project-tab.active { background: var(--accent-color); color: #000; border-color: transparent; }
+        .project-tab:hover:not(.active) { background: var(--card-bg); color: var(--text-primary); }
+
+        /* ── Empty state ── */
+        .empty-board {
+            grid-column: 1/-1; text-align: center;
+            color: var(--text-secondary); padding: 60px 20px;
+        }
+        .empty-board p { font-size: 1.1rem; margin: 8px 0 0; }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-bar">
+        <a href="index.html" class="nav-link">📅 Habit Tracker</a>
+        <a href="kanban.html" class="nav-link active">📋 Project Planner</a>
+        <a href="about.html" class="nav-link">ℹ️ About</a>
+        <button id="theme-toggle" class="icon-btn" title="Toggle Theme" style="font-size:1.3rem;">☀️</button>
+    </nav>
+
+    <div class="app-wrapper">
+        <header class="app-header">
+            <div>
+                <h1>📋 Project Planner</h1>
+                <p>Drag cards across columns to track progress</p>
+            </div>
+            <div class="header-controls">
+                <button id="new-project-btn" class="secondary-btn">+ New Project</button>
+                <button id="delete-project-btn" class="secondary-btn">🗑 Delete Project</button>
+            </div>
+        </header>
+
+        <div class="project-bar" id="project-bar">
+            </div>
+
+        <div class="board" id="board">
+            <div class="column" data-col="todo">
+                <div class="column-header">
+                    <span class="col-dot"></span>
+                    <span class="column-title">To Do</span>
+                    <span class="col-count" id="count-todo">0</span>
+                </div>
+                <div class="task-list" id="list-todo"></div>
+                <div class="add-task-form" data-col="todo">
+                    <button class="add-task-btn">+ Add Task</button>
+                    <div class="task-form-inputs">
+                        <input type="text" class="task-title-input" placeholder="Task title…">
+                        <div class="form-row">
+                            <select class="task-priority-input">
+                                <option value="medium">🟡 Medium</option>
+                                <option value="high">🔴 High</option>
+                                <option value="low">🟢 Low</option>
+                            </select>
+                            <input type="date" class="task-due-input">
+                        </div>
+                        <input type="text" class="task-tag-input" placeholder="Tag (optional, e.g. Design)">
+                        <div class="form-actions">
+                            <button class="form-confirm-btn">Add</button>
+                            <button class="form-cancel-btn">✕</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column" data-col="inprogress">
+                <div class="column-header">
+                    <span class="col-dot"></span>
+                    <span class="column-title">In Progress</span>
+                    <span class="col-count" id="count-inprogress">0</span>
+                </div>
+                <div class="task-list" id="list-inprogress"></div>
+                <div class="add-task-form" data-col="inprogress">
+                    <button class="add-task-btn">+ Add Task</button>
+                    <div class="task-form-inputs">
+                        <input type="text" class="task-title-input" placeholder="Task title…">
+                        <div class="form-row">
+                            <select class="task-priority-input">
+                                <option value="medium">🟡 Medium</option>
+                                <option value="high">🔴 High</option>
+                                <option value="low">🟢 Low</option>
+                            </select>
+                            <input type="date" class="task-due-input">
+                        </div>
+                        <input type="text" class="task-tag-input" placeholder="Tag (optional, e.g. Design)">
+                        <div class="form-actions">
+                            <button class="form-confirm-btn">Add</button>
+                            <button class="form-cancel-btn">✕</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column" data-col="done">
+                <div class="column-header">
+                    <span class="col-dot"></span>
+                    <span class="column-title">Done</span>
+                    <span class="col-count" id="count-done">0</span>
+                </div>
+                <div class="task-list" id="list-done"></div>
+                <div class="add-task-form" data-col="done">
+                    <button class="add-task-btn">+ Add Task</button>
+                    <div class="task-form-inputs">
+                        <input type="text" class="task-title-input" placeholder="Task title…">
+                        <div class="form-row">
+                            <select class="task-priority-input">
+                                <option value="medium">🟡 Medium</option>
+                                <option value="high">🔴 High</option>
+                                <option value="low">🟢 Low</option>
+                            </select>
+                            <input type="date" class="task-due-input">
+                        </div>
+                        <input type="text" class="task-tag-input" placeholder="Tag (optional, e.g. Design)">
+                        <div class="form-actions">
+                            <button class="form-confirm-btn">Add</button>
+                            <button class="form-cancel-btn">✕</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="project-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Create a New Project</h3>
+            <label for="proj-name-input">Project Name:</label>
+            <input type="text" id="proj-name-input" placeholder="e.g., Website Redesign">
+            <div class="modal-actions">
+                <button id="cancel-proj" class="secondary-btn">Cancel</button>
+                <button id="confirm-proj" class="primary-btn">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const themeToggle = document.getElementById('theme-toggle');
+    function applyTheme() {
+        const t = localStorage.getItem('habitAppTheme');
+        if (t === 'light') { document.body.classList.add('light-theme'); themeToggle.textContent = '🌙'; }
+        else               { document.body.classList.remove('light-theme'); themeToggle.textContent = '☀️'; }
+    }
+    applyTheme();
+    themeToggle.addEventListener('click', () => {
+        localStorage.setItem('habitAppTheme', document.body.classList.contains('light-theme') ? 'dark' : 'light');
+        applyTheme();
+    });
+
+    const STORE_KEY = 'kanbanData_v2';
+
+    function loadData() {
+        try { return JSON.parse(localStorage.getItem(STORE_KEY)) || defaultData(); }
+        catch { return defaultData(); }
+    }
+    function saveData(data) { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+    function defaultData() {
+        return {
+            activeProject: 'default',
+            projects: {
+                default: {
+                    name: 'My First Project',
+                    tasks: {
+                        todo: [
+                            { id: uid(), title: 'Plan project scope', priority: 'high',   due: '', tag: 'Planning' },
+                            { id: uid(), title: 'Set up repository',  priority: 'medium', due: '', tag: 'Dev' }
+                        ],
+                        inprogress: [
+                            { id: uid(), title: 'Design wireframes',  priority: 'medium', due: '', tag: 'Design' }
+                        ],
+                        done: [
+                            { id: uid(), title: 'Kick-off meeting',   priority: 'low',    due: '', tag: '' }
+                        ]
+                    }
+                }
+            }
+        };
+    }
+    function uid() { return Math.random().toString(36).slice(2, 9); }
+
+    let appData = loadData();
+    function activeProject() { return appData.projects[appData.activeProject]; }
+
+    function priorityClass(p) { return p === 'high' ? 'p-high' : p === 'low' ? 'p-low' : 'p-medium'; }
+
+    function buildTaskCard(task, col) {
+        const card = document.createElement('div');
+        card.className = 'task-card';
+        card.draggable = true;
+        card.dataset.id  = task.id;
+        card.dataset.col = col;
+
+        let dueHtml = '';
+        if (task.due) {
+            const dueDate  = new Date(task.due + 'T00:00:00');
+            const today    = new Date(); today.setHours(0,0,0,0);
+            const overdue  = dueDate < today;
+            const label    = dueDate.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+            dueHtml = `<div class="task-due ${overdue ? 'overdue' : ''}">📅 ${label}${overdue ? ' — Overdue!' : ''}</div>`;
+        }
+        const tagHtml = task.tag ? `<span class="task-tag">${task.tag}</span>` : '';
+
+        card.innerHTML = `
+            <div class="task-card-header">
+                <span class="task-priority ${priorityClass(task.priority)}"></span>
+                <span class="task-title">${task.title}</span>
+                <button class="task-delete-btn" title="Delete task">×</button>
+            </div>
+            <div class="task-meta">${tagHtml}</div>
+            ${dueHtml}
+        `;
+
+        card.querySelector('.task-delete-btn').addEventListener('click', () => {
+            const proj = activeProject();
+            proj.tasks[col] = proj.tasks[col].filter(t => t.id !== task.id);
+            saveData(appData);
+            renderBoard();
+        });
+
+        card.addEventListener('dragstart', e => {
+            e.dataTransfer.setData('taskId', task.id);
+            e.dataTransfer.setData('fromCol', col);
+            card.classList.add('dragging');
+        });
+        card.addEventListener('dragend', () => card.classList.remove('dragging'));
+
+        return card;
+    }
+
+    function renderBoard() {
+        const cols = ['todo', 'inprogress', 'done'];
+        const proj = activeProject();
+        cols.forEach(col => {
+            const list  = document.getElementById('list-' + col);
+            const count = document.getElementById('count-' + col);
+            list.innerHTML = '';
+            (proj.tasks[col] || []).forEach(task => list.appendChild(buildTaskCard(task, col)));
+            count.textContent = (proj.tasks[col] || []).length;
+        });
+    }
+
+    function renderProjectBar() {
+        const bar = document.getElementById('project-bar');
+        bar.innerHTML = '';
+        Object.entries(appData.projects).forEach(([key, proj]) => {
+            const tab = document.createElement('button');
+            tab.className = 'project-tab' + (key === appData.activeProject ? ' active' : '');
+            tab.textContent = proj.name;
+            tab.addEventListener('click', () => {
+                appData.activeProject = key;
+                saveData(appData);
+                renderProjectBar();
+                renderBoard();
+            });
+            bar.appendChild(tab);
+        });
+    }
+
+    document.querySelectorAll('.column').forEach(col => {
+        col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
+        col.addEventListener('dragleave', ()  => col.classList.remove('drag-over'));
+        col.addEventListener('drop', e => {
+            e.preventDefault();
+            col.classList.remove('drag-over');
+            const taskId  = e.dataTransfer.getData('taskId');
+            const fromCol = e.dataTransfer.getData('fromCol');
+            const toCol   = col.dataset.col;
+            if (!taskId || fromCol === toCol) return;
+
+            const proj   = activeProject();
+            const idx    = proj.tasks[fromCol].findIndex(t => t.id === taskId);
+            if (idx === -1) return;
+            const [task] = proj.tasks[fromCol].splice(idx, 1);
+            proj.tasks[toCol].push(task);
+            saveData(appData);
+            renderBoard();
+        });
+    });
+
+    document.querySelectorAll('.add-task-form').forEach(form => {
+        const col        = form.dataset.col;
+        const addBtn     = form.querySelector('.add-task-btn');
+        const inputs     = form.querySelector('.task-form-inputs');
+        const confirmBtn = form.querySelector('.form-confirm-btn');
+        const cancelBtn  = form.querySelector('.form-cancel-btn');
+
+        addBtn.addEventListener('click', () => { inputs.classList.add('open'); addBtn.style.display = 'none'; });
+        cancelBtn.addEventListener('click', reset);
+        confirmBtn.addEventListener('click', () => {
+            const title = form.querySelector('.task-title-input').value.trim();
+            if (!title) return;
+            const task = {
+                id:       uid(),
+                title:    title,
+                priority: form.querySelector('.task-priority-input').value,
+                due:      form.querySelector('.task-due-input').value,
+                tag:      form.querySelector('.task-tag-input').value.trim()
+            };
+            activeProject().tasks[col].push(task);
+            saveData(appData);
+            renderBoard();
+            reset();
+        });
+
+        function reset() {
+            inputs.classList.remove('open');
+            addBtn.style.display = '';
+            form.querySelector('.task-title-input').value = '';
+            form.querySelector('.task-due-input').value   = '';
+            form.querySelector('.task-tag-input').value   = '';
+        }
+    });
+
+    const projModal      = document.getElementById('project-modal');
+    const projNameInput  = document.getElementById('proj-name-input');
+    document.getElementById('new-project-btn').addEventListener('click', () => projModal.classList.remove('hidden'));
+    document.getElementById('cancel-proj').addEventListener('click',     () => { projModal.classList.add('hidden'); projNameInput.value = ''; });
+    document.getElementById('confirm-proj').addEventListener('click', () => {
+        const name = projNameInput.value.trim();
+        if (!name) return;
+        const key = uid();
+        appData.projects[key] = { name, tasks: { todo: [], inprogress: [], done: [] } };
+        appData.activeProject = key;
+        saveData(appData);
+        projModal.classList.add('hidden');
+        projNameInput.value = '';
+        renderProjectBar();
+        renderBoard();
+    });
+
+    document.getElementById('delete-project-btn').addEventListener('click', () => {
+        const keys = Object.keys(appData.projects);
+        if (keys.length <= 1) { alert("You need at least one project."); return; }
+        const name = activeProject().name;
+        if (!confirm(`Delete project "${name}" and all its tasks?`)) return;
+        delete appData.projects[appData.activeProject];
+        appData.activeProject = Object.keys(appData.projects)[0];
+        saveData(appData);
+        renderProjectBar();
+        renderBoard();
+    });
+
+    renderProjectBar();
+    renderBoard();
+    </script>
+</body>
+</html>

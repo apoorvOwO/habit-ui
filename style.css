@@ -1,203 +1,243 @@
-/* Variables & Reset */
+/* Variables & Settings (Dark Theme Default) */
 :root {
-    --bg-color: #0b0e14;       
-    --card-bg: #1a1f26;        
+    --bg-gradient: linear-gradient(-45deg, #0b0f19, #1a1f35, #0f172a, #1e1b4b);
+    --card-bg: rgba(26, 31, 38, 0.6); 
+    --card-border: rgba(255, 255, 255, 0.1);
     --text-primary: #ffffff;
     --text-secondary: #94a3b8;
-    --accent-color: #4ade80;   
-    --empty-square: #2d3748;   
+    --accent-color: #4ade80; 
+    --empty-square: rgba(255, 255, 255, 0.1);   
 }
 
-* {
-    box-sizing: border-box;
+/* Light Theme Color Palette */
+body.light-theme {
+    --bg-gradient: linear-gradient(-45deg, #fdfbfb, #ebedee, #f3e7e9, #e3eeff);
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --card-border: rgba(0, 0, 0, 0.1);
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --empty-square: rgba(0, 0, 0, 0.08);   
 }
+
+* { box-sizing: border-box; }
 
 body {
-    background-color: var(--bg-color);
+    background: var(--bg-gradient);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite; 
+    background-attachment: fixed;
     color: var(--text-primary);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 30px 20px;
     display: flex;
     justify-content: center;
+    transition: color 0.3s ease; 
 }
 
-/* Layout modifications */
-.app-wrapper {
-    width: 100%;
-    max-width: 450px; 
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
-.app-header {
+/* =========================================
+   NEW: Fixed Global Navigation
+   ========================================= */
+.nav-bar {
+    position: fixed;
+    top: 20px;
+    right: 20px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    gap: 10px;
+    z-index: 1000;
 }
 
-h1 { margin: 0; font-size: 1.5rem; }
-p { margin: 0; color: var(--text-secondary); font-size: 0.9rem; }
-
-/* Setting up how the habit cards look */
-.habit-card {
+.nav-link {
     background: var(--card-bg);
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-    margin-bottom: 20px;
-}
-
-.habit-info {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.habit-title {
-    font-size: 1.1rem;
-    margin: 0;
-}
-
-.streak-count {
-    color: var(--accent-color);
-    font-weight: bold;
-    font-size: 0.85rem;
-}
-
-/* Defining the behaviour of the habit grid */
-/* Here I faced an issue where 365 squares were becoming too small because 
-   the grid was trying to fit them all into the width of the card. 
-   To fix this, I changed the column width to a fixed 14px and added 
-   overflow-x: auto. This forces the squares to keep their size and 
-   allows the user to scroll horizontally through the entire year. */
-.habit-grid {
-    display: grid;
-    grid-template-rows: repeat(7, 14px); /* Fixed row height to match square size */
-    grid-auto-flow: column; 
-    grid-auto-columns: 14px; /* Fixed column width prevents squashing */
-    gap: 5px; 
-    margin-bottom: 15px;
-    
-    /* 1. Enable horizontal scrolling */
-    overflow-x: auto;
-    /* 2. Add padding to prevent the scrollbar from touching the squares */
-    padding-bottom: 12px;
-}
-
-/* Custom Scrollbar Styling (Optional for a cleaner look) */
-.habit-grid::-webkit-scrollbar {
-    height: 6px;
-}
-.habit-grid::-webkit-scrollbar-thumb {
-    background: var(--empty-square);
+    color: var(--text-secondary);
+    border: 1px solid var(--card-border);
+    padding: 8px 18px;
     border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background 0.2s, color 0.2s;
+    backdrop-filter: blur(12px); /* Keeps it readable when scrolling */
 }
 
-.square {
-    background-color: var(--empty-square);
-    /* 1. Using fixed width and height instead of aspect-ratio to ensure size */
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
-    transition: transform 0.1s ease, background-color 0.2s ease;
-}
-
-.square:hover {
-    transform: scale(1.1);
-    cursor: pointer;
-}
-
-.square.completed {
-    background-color: var(--accent-color);
-}
-
-/* Interactive elements */
-.primary-btn {
+.nav-link:hover, .nav-link.active {
     background: var(--accent-color);
     color: #000;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s;
+    border-color: transparent;
 }
 
-.primary-btn:active {
-    opacity: 0.8;
-}
-/* Adding a secondary button style for the Clear action */
-.secondary-btn {
-    background: #334155; /* A subtle gray so it doesn't distract from the main 'New' button */
-    color: #ffffff;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-right: 8px;
-    transition: background 0.2s;
-}
+/* Push app wrapper down slightly so the fixed nav doesn't overlap headers */
+.app-wrapper { width: 100%; max-width: 850px; margin-top: 40px; }
 
-.secondary-btn:hover {
-    background: #ef4444; /* Turns red on hover to warn the user it's a destructive action */
-}
+.app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+.header-controls { display: flex; align-items: center; gap: 10px; }
+h1 { margin: 0; font-size: 2rem; font-weight: 800; }
+p { margin: 5px 0 0 0; color: var(--text-secondary); font-size: 1rem; }
 
-
-
-/* Setting up how the habit cards look */
+/* Habit Card (Glassmorphism Effect) */
 .habit-card {
     background: var(--card-bg);
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-    margin-bottom: 20px;
-    
-    /* Here I modified the card to use Flexbox. This allows us to keep the 
-       grid on the left and place our new progress chart to the right. */
-    display: flex;
-    align-items: center;
-    gap: 20px;
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); 
+    margin-bottom: 30px;
+    display: flex; flex-direction: column; 
+    --habit-color: #4ade80; 
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-/* Container for the Title and Grid (Left Side) */
-.card-main {
-    flex: 1; /* Takes up all available space on the left */
-    overflow: hidden; /* Ensures the scrolling grid doesn't break the layout */
-}
+.habit-card:hover { transform: translateY(-3px); }
 
-/* Container for the Circular Progress Chart (Right Side) */
-.card-stats {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 80px;
-}
+.card-top { display: flex; align-items: center; gap: 30px; width: 100%; }
+.card-main { flex: 1; overflow: hidden; }
+.card-stats { display: flex; flex-direction: column; align-items: center; min-width: 100px; }
 
-/* SVG Circular Progress Styling */
-.progress-ring {
-    transform: rotate(-90deg); /* Rotate so progress starts from the top */
-}
+.streak-count { color: var(--habit-color); font-weight: bold; font-size: 1rem; }
 
-.progress-ring-circle-bg {
-    fill: none;
-    stroke: var(--empty-square);
-    stroke-width: 4;
-}
+/* Header & Controls */
+.habit-header { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; }
+.habit-info { display: flex; flex-direction: column; margin-bottom: 20px; }
+.habit-title { margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700; }
+.card-controls { display: flex; gap: 15px; }
 
+.icon-btn {
+    background: transparent; border: none; color: var(--text-secondary);
+    font-size: 1.4rem; cursor: pointer; transition: color 0.2s; padding: 0;
+}
+.icon-btn:hover { color: var(--habit-color); }
+.delete-btn:hover { color: #ef4444; } 
+
+/* =========================================
+   UPDATED: Larger Grid Styling
+   ========================================= */
+.habit-grid {
+    display: grid; 
+    grid-template-rows: repeat(7, 28px); /* Increased size */
+    grid-auto-flow: column; 
+    grid-auto-columns: 28px; /* Increased size */
+    gap: 8px; 
+    overflow-x: auto; 
+    padding-bottom: 12px;
+}
+.habit-grid::-webkit-scrollbar { height: 8px; }
+.habit-grid::-webkit-scrollbar-thumb { background: var(--empty-square); border-radius: 10px; }
+
+.square {
+    background-color: var(--empty-square); 
+    width: 28px; /* Increased size */
+    height: 28px; /* Increased size */
+    border-radius: 6px; 
+    transition: transform 0.1s ease, background-color 0.2s ease;
+}
+.square:hover { transform: scale(1.15); cursor: pointer; box-shadow: 0 0 8px var(--habit-color); }
+.square.completed { background-color: var(--habit-color); }
+
+/* SVG Circular Progress */
+.progress-ring { transform: rotate(-90deg); width: 90px; height: 90px; }
+.progress-ring-circle-bg { fill: none; stroke: var(--empty-square); stroke-width: 6; }
 .progress-ring-circle {
-    fill: none;
-    stroke: var(--accent-color);
-    stroke-width: 4;
-    stroke-linecap: round;
-    /* Transition ensures the ring 'grows' smoothly when squares are clicked */
-    transition: stroke-dashoffset 0.35s;
-    transform-origin: 50% 50%;
+    fill: none; stroke: var(--habit-color); stroke-width: 6; stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease-out; transform-origin: 50% 50%;
+}
+.percentage-text { font-size: 0.9rem; font-weight: bold; fill: var(--text-primary); }
+
+/* Analytics Chart */
+.chart-container { display: none; width: 100%; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--empty-square); }
+.chart-container.active { display: block; }
+
+/* Buttons */
+.primary-btn { background: var(--accent-color); color: #000; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; }
+.secondary-btn { background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); color: var(--text-primary); padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; backdrop-filter: blur(5px); }
+.secondary-btn:hover { background: #ef4444; color: white; border-color: #ef4444;}
+body.light-theme .secondary-btn { background: rgba(0,0,0,0.05); }
+
+/* Deadline Badge */
+.deadline-badge {
+    display: inline-block; background: var(--empty-square); color: var(--text-primary);
+    padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; margin-top: 10px; width: fit-content;
 }
 
-.percentage-text {
-    font-size: 0.7rem;
-    font-weight: bold;
-    fill: var(--text-primary);
+/* Modal */
+.modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center;
+    z-index: 1000; opacity: 1; transition: opacity 0.2s; backdrop-filter: blur(5px);
 }
+.modal.hidden { opacity: 0; pointer-events: none; }
+.modal-content {
+    background: var(--card-bg); padding: 30px; border-radius: 20px;
+    width: 90%; max-width: 450px; display: flex; flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); border: 1px solid var(--card-border);
+}
+.modal-content h3 { margin-top: 0; margin-bottom: 20px; font-size: 1.5rem; }
+.modal-content label { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; }
+.modal-content input {
+    background: rgba(0,0,0,0.2); color: var(--text-primary);
+    border: 1px solid var(--card-border); padding: 12px; border-radius: 10px;
+    margin-bottom: 20px; font-family: inherit; font-size: 1rem;
+}
+body.light-theme .modal-content input { background: rgba(255,255,255,0.5); }
+.modal-content input:focus { outline: 2px solid var(--accent-color); border-color: transparent; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 10px; }
 
+/* Details Panel (Sub-goals & Notes) */
+.details-panel {
+    display: none; 
+    width: 100%;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--card-border);
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+.details-panel.active { display: grid; }
+@media (max-width: 650px) { .details-panel.active { grid-template-columns: 1fr; } }
+
+.panel-section h4 { margin: 0 0 15px 0; font-size: 1.1rem; color: var(--text-primary); }
+
+.item-list {
+    list-style: none; padding: 0; margin: 0 0 15px 0;
+    max-height: 150px; overflow-y: auto;
+}
+.item-list::-webkit-scrollbar { width: 4px; }
+.item-list::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 4px; }
+
+.item-list li {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: rgba(0, 0, 0, 0.2); padding: 10px; border-radius: 8px;
+    margin-bottom: 8px; font-size: 0.9rem;
+}
+body.light-theme .item-list li { background: rgba(0, 0, 0, 0.04); }
+
+.completed-text { text-decoration: line-through; color: var(--text-secondary); }
+.note-content { display: flex; flex-direction: column; flex: 1; }
+.note-date { font-size: 0.7rem; color: var(--habit-color); margin-bottom: 2px; font-weight: bold; }
+
+.delete-item-btn {
+    background: transparent; border: none; color: var(--text-secondary);
+    font-size: 1.2rem; cursor: pointer; margin-left: auto; line-height: 1;
+}
+.delete-item-btn:hover { color: #ef4444; }
+
+.add-input-group { display: flex; gap: 10px; }
+.add-input-group input {
+    flex: 1; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--card-border);
+    color: var(--text-primary); padding: 8px 12px; border-radius: 8px; font-size: 0.9rem;
+}
+body.light-theme .add-input-group input { background: rgba(255, 255, 255, 0.5); }
+.add-input-group input:focus { outline: 1px solid var(--habit-color); border-color: transparent; }
+
+.add-btn {
+    background: var(--habit-color); color: #000; border: none;
+    width: 35px; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: pointer;
+}
