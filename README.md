@@ -2,7 +2,7 @@
 
 A local-first, zero-telemetry productivity suite built for speed and focus. Track habits, manage complex builds, and stash notes. Everything lives in your browser's `localStorage`. No accounts, no cloud, no bloat.
 
-Built with a heavy glassmorphism aesthetic and a custom techwear-inspired "Clause" dark mode. 
+Built with a heavy glassmorphism aesthetic and a custom techwear-inspired "Claude" dark mode. 
 
 ## 🛠️ Core Features
 
@@ -17,7 +17,7 @@ Visual, GitHub-style contribution grid to track daily progress.
 Drag-and-drop board for multi-step projects.
 - **Multiple Workspaces:** Tab between different projects instantly.
 - **Card Metadata:** Add priority tags, deadlines, and categories. 
-- *Use Case:* Perfect for staging hardware mods (e.g., tracking 3D slicer settings for a Scott Yu-Jan dock) or software dev.
+- *Use Case:* Perfect for staging hardware mods (e.g.,  software dev. goals etc)
 
 ### 3. 📝 Notes & Keep
 Quick-capture brain dump space.
