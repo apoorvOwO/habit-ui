@@ -1,4 +1,8 @@
-/* Variables & Settings (Dark Theme Default) */
+/* =========================================
+   Global Variables & Theming
+   ========================================= */
+
+/* Dark Theme (Default) */
 :root {
     --bg-gradient: linear-gradient(-45deg, #0b0f19, #1a1f35, #0f172a, #1e1b4b);
     --card-bg: rgba(26, 31, 38, 0.6); 
@@ -9,7 +13,7 @@
     --empty-square: rgba(255, 255, 255, 0.1);   
 }
 
-/* Light Theme Color Palette */
+/* Light Theme - Overrides the variables in :root when the .light-theme class is on the body */
 body.light-theme {
     --bg-gradient: linear-gradient(-45deg, #fdfbfb, #ebedee, #f3e7e9, #e3eeff);
     --card-bg: rgba(255, 255, 255, 0.7);
@@ -19,8 +23,12 @@ body.light-theme {
     --empty-square: rgba(0, 0, 0, 0.08);   
 }
 
+/* =========================================
+   Base & Global Styles
+   ========================================= */
 * { box-sizing: border-box; }
 
+/* Animated gradient background for the whole page */
 body {
     background: var(--bg-gradient);
     background-size: 400% 400%;
@@ -35,6 +43,7 @@ body {
     transition: color 0.3s ease; 
 }
 
+/* Keyframes for the animated background gradient position */
 @keyframes gradientBG {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -42,7 +51,7 @@ body {
 }
 
 /* =========================================
-   NEW: Fixed Global Navigation
+   Fixed Global Navigation
    ========================================= */
 .nav-bar {
     position: fixed;
@@ -54,6 +63,7 @@ body {
     z-index: 1000;
 }
 
+/* Individual navigation links with a glassmorphism effect */
 .nav-link {
     background: var(--card-bg);
     color: var(--text-secondary);
@@ -73,14 +83,20 @@ body {
     border-color: transparent;
 }
 
-/* Push app wrapper down slightly so the fixed nav doesn't overlap headers */
+/* =========================================
+   Main App Layout
+   ========================================= */
+
+/* A wrapper to center the main content and push it down below the fixed nav */
 .app-wrapper { width: 100%; max-width: 850px; margin-top: 40px; }
 
 .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
 .header-controls { display: flex; align-items: center; gap: 10px; }
 h1 { margin: 0; font-size: 2rem; font-weight: 800; }
 p { margin: 5px 0 0 0; color: var(--text-secondary); font-size: 1rem; }
-
+/* =========================================
+   Habit Card Component
+   ========================================= */
 /* Habit Card (Glassmorphism Effect) */
 .habit-card {
     background: var(--card-bg);
@@ -92,7 +108,7 @@ p { margin: 5px 0 0 0; color: var(--text-secondary); font-size: 1rem; }
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); 
     margin-bottom: 30px;
     display: flex; flex-direction: column; 
-    --habit-color: #4ade80; 
+    --habit-color: #4ade80; /* Local variable for the habit's specific color */
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
@@ -102,12 +118,12 @@ p { margin: 5px 0 0 0; color: var(--text-secondary); font-size: 1rem; }
 .card-main { flex: 1; overflow: hidden; }
 .card-stats { display: flex; flex-direction: column; align-items: center; min-width: 100px; }
 
-.streak-count { color: var(--habit-color); font-weight: bold; font-size: 1rem; }
-
-/* Header & Controls */
+/* Header section within the card */
 .habit-header { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; }
 .habit-info { display: flex; flex-direction: column; margin-bottom: 20px; }
 .habit-title { margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700; }
+.streak-count { color: var(--habit-color); font-weight: bold; font-size: 1rem; }
+
 .card-controls { display: flex; gap: 15px; }
 
 .icon-btn {
@@ -118,7 +134,7 @@ p { margin: 5px 0 0 0; color: var(--text-secondary); font-size: 1rem; }
 .delete-btn:hover { color: #ef4444; } 
 
 /* =========================================
-   UPDATED: Larger Grid Styling
+   Habit Grid (The Calendar)
    ========================================= */
 .habit-grid {
     display: grid; 
@@ -132,6 +148,7 @@ p { margin: 5px 0 0 0; color: var(--text-secondary); font-size: 1rem; }
 .habit-grid::-webkit-scrollbar { height: 8px; }
 .habit-grid::-webkit-scrollbar-thumb { background: var(--empty-square); border-radius: 10px; }
 
+/* Individual day in the habit grid */
 .square {
     background-color: var(--empty-square); 
     width: 28px; /* Increased size */
@@ -142,7 +159,9 @@ p { margin: 5px 0 0 0; color: var(--text-secondary); font-size: 1rem; }
 .square:hover { transform: scale(1.15); cursor: pointer; box-shadow: 0 0 8px var(--habit-color); }
 .square.completed { background-color: var(--habit-color); }
 
-/* SVG Circular Progress */
+/* =========================================
+   SVG Circular Progress & Chart
+   ========================================= */
 .progress-ring { transform: rotate(-90deg); width: 90px; height: 90px; }
 .progress-ring-circle-bg { fill: none; stroke: var(--empty-square); stroke-width: 6; }
 .progress-ring-circle {
@@ -151,11 +170,14 @@ p { margin: 5px 0 0 0; color: var(--text-secondary); font-size: 1rem; }
 }
 .percentage-text { font-size: 0.9rem; font-weight: bold; fill: var(--text-primary); }
 
-/* Analytics Chart */
+/* Container for the Chart.js canvas */
 .chart-container { display: none; width: 100%; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--empty-square); }
 .chart-container.active { display: block; }
 
-/* Buttons */
+/* =========================================
+   Buttons & Badges
+   ========================================= */
+/* General purpose buttons */
 .primary-btn { background: var(--accent-color); color: #000; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; }
 .secondary-btn { background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); color: var(--text-primary); padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; backdrop-filter: blur(5px); }
 .secondary-btn:hover { background: #ef4444; color: white; border-color: #ef4444;}
@@ -167,7 +189,9 @@ body.light-theme .secondary-btn { background: rgba(0,0,0,0.05); }
     padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; margin-top: 10px; width: fit-content;
 }
 
-/* Modal */
+/* =========================================
+   Modal (for adding new habits)
+   ========================================= */
 .modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center;
@@ -189,7 +213,9 @@ body.light-theme .secondary-btn { background: rgba(0,0,0,0.05); }
 body.light-theme .modal-content input { background: rgba(255,255,255,0.5); }
 .modal-content input:focus { outline: 2px solid var(--accent-color); border-color: transparent; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 10px; }
-
+/* =========================================
+   Details Panel (Sub-goals & Notes)
+   ========================================= */
 /* Details Panel (Sub-goals & Notes) */
 .details-panel {
     display: none; 
@@ -205,6 +231,7 @@ body.light-theme .modal-content input { background: rgba(255,255,255,0.5); }
 
 .panel-section h4 { margin: 0 0 15px 0; font-size: 1.1rem; color: var(--text-primary); }
 
+/* Scrollable list for sub-goals and notes */
 .item-list {
     list-style: none; padding: 0; margin: 0 0 15px 0;
     max-height: 150px; overflow-y: auto;
@@ -212,6 +239,7 @@ body.light-theme .modal-content input { background: rgba(255,255,255,0.5); }
 .item-list::-webkit-scrollbar { width: 4px; }
 .item-list::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 4px; }
 
+/* Individual item in the sub-goal or notes list */
 .item-list li {
     display: flex; align-items: flex-start; gap: 10px;
     background: rgba(0, 0, 0, 0.2); padding: 10px; border-radius: 8px;
@@ -229,6 +257,7 @@ body.light-theme .item-list li { background: rgba(0, 0, 0, 0.04); }
 }
 .delete-item-btn:hover { color: #ef4444; }
 
+/* Input group for adding a new sub-goal or note */
 .add-input-group { display: flex; gap: 10px; }
 .add-input-group input {
     flex: 1; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--card-border);
